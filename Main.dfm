@@ -1,6 +1,6 @@
 object MainForm: TMainForm
-  Left = 215
-  Top = 134
+  Left = 209
+  Top = 123
   BorderStyle = bsToolWindow
   Caption = 'ROS Serial Tester'
   ClientHeight = 602
@@ -17,6 +17,21 @@ object MainForm: TMainForm
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
+  object ValueLabel: TLabel
+    Left = 40
+    Top = 568
+    Width = 329
+    Height = 13
+    Alignment = taCenter
+    AutoSize = False
+    Caption = 'ValueLabel'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clBlack
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
   object ConnectionGroup: TGroupBox
     Left = 8
     Top = 8
@@ -104,6 +119,15 @@ object MainForm: TMainForm
     Caption = 'C'
     TabOrder = 3
     OnClick = ClearBtnClick
+  end
+  object LedButton: TButton
+    Left = 456
+    Top = 568
+    Width = 35
+    Height = 25
+    Caption = 'LED'
+    TabOrder = 4
+    OnClick = LedButtonClick
   end
   object UART: TUART
     UARTPort = 6

@@ -32,6 +32,7 @@ type
       function GetDataSize() : Integer;
       function GetString(AIndex : Word) : String;
       //function GetID : Cardinal;
+      function GetDataAsFloat(AIndex : Integer): Single;
 
       function GetData(AIndex : Integer) : PByte; overload;
       function GetDataAsInteger(AIndex : Integer) : Integer;
@@ -105,7 +106,7 @@ function TServerRxPacket.GetLength : Integer;
 begin
   //Result:= FRxPacket[1] + (FRxPacket[2] shl 8);
   //if ($10 = GetCommand)
-  Result:= FRxSize;
+  Result := FRxSize;
   //  else Result:= 0;
 end;
 
@@ -217,6 +218,11 @@ end;
 function TServerRxPacket.GetDataAsInteger(AIndex : Integer): Integer;
 begin
   Result:= Integer((@FRxPacket.MsgData[AIndex])^);
+end;
+
+function TServerRxPacket.GetDataAsFloat(AIndex : Integer): Single;
+begin
+  Result:= Single((@FRxPacket.MsgData[AIndex])^);
 end;
 
 function TServerRxPacket.GetDataAsString(AIndex, ALength : Integer) : String;

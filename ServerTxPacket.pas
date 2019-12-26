@@ -3,8 +3,7 @@ unit ServerTxPacket;
 interface
 
 uses
-  Windows, Classes, SysUtils, DateUtils, Debug,
-  IdGlobal;
+  Windows, Classes, SysUtils, DateUtils;
 
 type
   TServerTxPacketData = array[0..1023]of Byte;
@@ -20,7 +19,6 @@ type
       function GetCommand() : Byte;
       procedure SetCommand(AValue : Byte);
       function SetCRC() : Boolean;
-      function InBytes() : TIdBytes;
       procedure PutStringParam(AType : Byte; AValue : String);
       procedure SetID(AValue : Cardinal);
       //procedure SetSuccessfullPacketID(AValue : Cardinal);
@@ -133,10 +131,10 @@ begin
 end;
 
 
-function TServerTxPacket.InBytes : TIdBytes;
+{function TServerTxPacket.InBytes : TIdBytes;
 begin
   Result:= RawToBytes(FTxPacket, FTxSize);
-end;
+end;}
 
 procedure TServerTxPacket.PutStringParam(AType : Byte; AValue : String);
 var ParLen : Integer;

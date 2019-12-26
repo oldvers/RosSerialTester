@@ -19,6 +19,8 @@ type
     LogMemo: TMemo;
     UART: TUART;
     ClearBtn: TButton;
+    ValueLabel: TLabel;
+    LedButton: TButton;
     procedure FormCreate(Sender: TObject);
     procedure UpdatePortsListClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -29,6 +31,7 @@ type
       const ErrCode: Cardinal);
     procedure FormDestroy(Sender: TObject);
     procedure ClearBtnClick(Sender: TObject);
+    procedure LedButtonClick(Sender: TObject);
   private
     RxPacket : TServerRxPacket;
     procedure Log(AStr : String; APar : array of const);
@@ -154,8 +157,8 @@ var
   s     : String;
   rsp   : TRosSerialPacket;
 begin
-//  Log('Rx -------- %d Bytes', [Size]);
-//  LogArray(Buffer, Size);
+  Log('Rx -------- %d Bytes', [Size]);
+  LogArray(Buffer, Size);
 
   p := Buffer;
   for i := 0 to (Size - 1) do
@@ -166,11 +169,14 @@ begin
           Log('---- Rx Packet Detected', []);
 
           case RxPacket.GetTopicId of
-            0   :  // ID_PUBLISHER         = 0
+            0, 1 :  // ID_PUBLISHER         = 0
+                    // ID_SUBSCRIBER        = 1
                   begin
-                    Log('  - Topic ID           = %d - Publisher', [RxPacket.GetTopicId]);
+                    if 1 = RxPacket.GetTopicId
+                      then Log('  - Topic ID           = %d - Subscriber', [RxPacket.GetTopicId])
+                      else Log('  - Topic ID           = %d - Publisher', [RxPacket.GetTopicId]);
                     o := 0;
-                    Log('  - Publisher Topic ID = %d', [RxPacket.GetDataAsWord(o)]);
+                    Log('  - Pub/Sub Topic ID   = %d', [RxPacket.GetDataAsWord(o)]);
                     o := o + 2;
                     s := RxPacket.GetString(o);
                     Log('  - Topic Name         = %s', [s]);
@@ -183,7 +189,6 @@ begin
                     o := o + Length(s) + 4;
                     Log('  - Buffer Size        = %d', [RxPacket.GetDataAsInteger(o)]);
                   end;
-            1   : ;// ID_SUBSCRIBER        = 1
             2   : ;// ID_SERVICE_SERVER    = 2
             4   : ;// ID_SERVICE_CLIENT    = 4
             6   : ;// ID_PARAMETER_REQUEST = 6
@@ -214,7 +219,29 @@ begin
             125 :
                   begin
                     Log('  - Topic ID           = %d - User', [RxPacket.GetTopicId]);
-                    Log('  - Message            = %s', [RxPacket.GetString(0)]);
+                    //Log('  - Message            = %s', [RxPacket.GetString(0)]);
+                    //LogArray(RxPacket.GetData, RxPacket.GetLength);
+                    o := 0;
+                    Log('  - Sequence           = %d', [RxPacket.GetDataAsInteger(o)]);
+                    o := o + 4;
+                    Log('  - Time Seconds       = %d', [RxPacket.GetDataAsInteger(o)]);
+                    o := o + 4;
+                    Log('  - Time Nano Seconds  = %d', [RxPacket.GetDataAsInteger(o)]);
+                    o := o + 4;
+                    s := RxPacket.GetString(o);
+                    Log('  - Frame ID           = %s', [s]);
+                    o := o + 4 + Length(s);
+                    Log('  - Radiation Type     = %d', [RxPacket.GetDataAsByte(o)]);
+                    o := o + 1;
+                    Log('  - Field Of View      = %5.2f', [RxPacket.GetDataAsFloat(o)]);
+                    o := o + 4;
+                    Log('  - Min Range          = %5.2f', [RxPacket.GetDataAsFloat(o)]);
+                    o := o + 4;
+                    Log('  - Max Range          = %5.2f', [RxPacket.GetDataAsFloat(o)]);
+                    o := o + 4;
+                    Log('  - Range              = %5.2f', [RxPacket.GetDataAsFloat(o)]);
+
+                    ValueLabel.Caption := Format('Distance = %5.2f cm', [RxPacket.GetDataAsFloat(o)]);
                   end;
             else
                  begin
@@ -260,6 +287,18 @@ end;
 procedure TMainForm.ClearBtnClick(Sender: TObject);
 begin
   LogMemo.Clear;
+end;
+
+procedure TMainForm.LedButtonClick(Sender: TObject);
+var req : TRosSerialPacket;
+begin
+  req.Sync := $FF;
+  req.ProtocolVer := $FE;
+  req.MsgLen := 0;
+  req.MsgLenCs := GetRosCs(@req.MsgLen, 2);
+  req.TopicId := 100;
+  req.Msg[0] := GetRosCs(@req.TopicId, req.MsgLen + 2);
+  UART.TxBuffer(@req, req.MsgLen + 8);
 end;
 
 end.
