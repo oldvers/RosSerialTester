@@ -18,6 +18,7 @@ type
       FRxNextByte : Boolean;
       FRxIndex    : Integer;
       FRxSize     : Integer;
+      function GetCs(PArray : PByte; ASize : Cardinal) : Byte;
     public
       constructor Create();
       procedure Clear();
@@ -27,13 +28,10 @@ type
       function CheckEndOfPacket() : Boolean;
       function GetLength() : Integer;
       function GetTopicId() : Word;
-      function GetCs(PArray : PByte; ASize : Cardinal) : Byte;
       function GetData() : PByte; overload;
       function GetDataSize() : Integer;
       function GetString(AIndex : Word) : String;
-      //function GetID : Cardinal;
       function GetDataAsFloat(AIndex : Integer): Single;
-
       function GetData(AIndex : Integer) : PByte; overload;
       function GetDataAsInteger(AIndex : Integer) : Integer;
       function GetDataAsByte(AIndex : Integer) : Byte;
@@ -44,7 +42,6 @@ type
       property RxIndex : Integer read FRxIndex;
       property RxSize : Integer read FRxSize;
     end;
-
 
 implementation
 
@@ -74,13 +71,7 @@ begin
 
   if (IsRxSizeMatch()) then
     try
-      Result:= True; //CheckCRC();
-
-      if (Result) then
-        begin
-
-        end;
-
+      Result:= True;
       SetComplete();
     except
       //
@@ -104,10 +95,7 @@ end;
 
 function TServerRxPacket.GetLength : Integer;
 begin
-  //Result:= FRxPacket[1] + (FRxPacket[2] shl 8);
-  //if ($10 = GetCommand)
   Result := FRxSize;
-  //  else Result:= 0;
 end;
 
 function TServerRxPacket.IsRxSizeMatch: Boolean;
@@ -148,7 +136,6 @@ begin
 
   if (FRxNextByte) then
     begin
-      //FRxPacket[FRxIndex]:= AValue;
       FRxIndex := FRxIndex + 1;
     end else begin
       FRxIndex := 0;
@@ -170,25 +157,6 @@ function TServerRxPacket.GetString(AIndex : Word) : String;
 var i, s : Integer;
 begin
   Result:= '';
-  //if GetCommand <> $01 then Exit;
-
-  //b:= 0;
-  //e:= 0;
-
-  {for i:= 10 to 1023 do if FRxPacket.MsgData[i] = AType then
-    begin
-      b:= i + 1;
-      Break;
-    end;}
-
-  {for i:= b to 1023 do if FRxPacket.MsgData[i] = $00 then
-    begin
-      e:= i;
-      Break;
-    end;}
-
-  //if(b <> 0)and(e <> 0)and(e > b)then
-  //  begin
 
   s := Integer((@FRxPacket.MsgData[AIndex])^);
   if (s < 0) or (s > 100) then Exit;
@@ -196,14 +164,7 @@ begin
 
   SetLength(Result, s);
   CopyMemory(@Result[1], @FRxPacket.MsgData[AIndex + 4], s);
-  //  end;
 end;
-
-{function TServerRxPacket.GetID : Cardinal;
-begin
-  Result:= 0;
-  CopyMemory(@Result, @FRxPacket[1], 4);
-end;}
 
 function TServerRxPacket.GetDataSize : Integer;
 begin

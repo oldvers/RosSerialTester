@@ -1,6 +1,6 @@
 object MainForm: TMainForm
-  Left = 209
-  Top = 123
+  Left = 2897
+  Top = 330
   BorderStyle = bsToolWindow
   Caption = 'ROS Serial Tester'
   ClientHeight = 602
@@ -131,7 +131,7 @@ object MainForm: TMainForm
   end
   object UART: TUART
     UARTPort = 6
-    UARTProp.BaudRate = BR__57600
+    UARTProp.BaudRate = BR_115200
     UARTProp.ByteSize = BS8
     UARTProp.Parity = P_None
     UARTProp.StopBits = SB_10

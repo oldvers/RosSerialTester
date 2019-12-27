@@ -1,0 +1,15 @@
+{
+  "TopicInfo" :
+  {
+    "TopicId"   : "Word",
+    "TopicName" : "String",
+    "MsgType"   : "String",
+    "MD5Sum"    : "String",
+    "BufSize"   : "Word"
+  },
+  "Log" :
+  {
+    "Level"     : "Byte",
+    "Msg"       : "String"
+  }
+}

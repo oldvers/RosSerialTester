@@ -5,22 +5,22 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, UARTLink, ExtCtrls, ComCtrls,
-  UART, ServerRxPacket;
+  UART, ServerRxPacket, ServerTxPacket;
 
 type
   TMainForm = class(TForm)
-    ConnectionGroup: TGroupBox;
-    UpdatePortsList: TButton;
-    PortsList: TComboBox;
-    LED: TPanel;
-    ConnectBtn: TButton;
-    PourGroup: TGroupBox;
-    StartBtn: TButton;
-    LogMemo: TMemo;
-    UART: TUART;
-    ClearBtn: TButton;
-    ValueLabel: TLabel;
-    LedButton: TButton;
+    ConnectionGroup : TGroupBox;
+    UpdatePortsList : TButton;
+    PortsList : TComboBox;
+    LED : TPanel;
+    ConnectBtn : TButton;
+    PourGroup : TGroupBox;
+    StartBtn : TButton;
+    LogMemo : TMemo;
+    UART : TUART;
+    ClearBtn : TButton;
+    ValueLabel : TLabel;
+    LedButton : TButton;
     procedure FormCreate(Sender: TObject);
     procedure UpdatePortsListClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -34,6 +34,7 @@ type
     procedure LedButtonClick(Sender: TObject);
   private
     RxPacket : TServerRxPacket;
+    TxPacket : TServerTxPacket;
     procedure Log(AStr : String; APar : array of const);
     procedure LogArray(PArray : PByte; ASize : Cardinal);
     function GetRosCs(PArray : PByte; ASize : Cardinal) : Byte;
@@ -68,6 +69,7 @@ begin
   UART.EnumCOMPorts(PortsList.Items);
 
   RxPacket := TServerRxPacket.Create;
+  TxPacket := TServerTxPacket.Create;
 end;
 
 procedure TMainForm.UpdatePortsListClick(Sender: TObject);
@@ -128,20 +130,14 @@ begin
 end;
 
 procedure TMainForm.StartBtnClick(Sender: TObject);
-var Packet : TRosSerialPacket;
 begin
   if not UART.Connected then Exit;
 
-  Packet.Sync := $FF;
-  Packet.ProtocolVer := $FE;
-  Packet.MsgLen := 0;
-  Packet.MsgLenCs := GetRosCs(@Packet.MsgLen, 2);
-  Packet.TopicId := 0;
-  Packet.Msg[0] := GetRosCs(@Packet.TopicId, Packet.MsgLen + 2);
+  TxPacket.Clear;
 
-  LogArray(@Packet, Packet.MsgLen + 8);
+  LogArray(TxPacket.Raw, TxPacket.RawSize);
 
-  UART.TxBuffer(@Packet, Packet.MsgLen + 8);
+  UART.TxBuffer(PAnsiChar(TxPacket.Raw), TxPacket.RawSize);
 end;
 
 procedure TMainForm.Log(AStr : String; APar : array of const);
@@ -282,6 +278,7 @@ end;
 procedure TMainForm.FormDestroy(Sender: TObject);
 begin
   RxPacket.Free;
+  TxPacket.Free;
 end;
 
 procedure TMainForm.ClearBtnClick(Sender: TObject);
